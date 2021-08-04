@@ -1,3 +1,4 @@
+# syntax = docker/dockerfile:1.2
 ARG POSTGRES_VERSION=13
 
 # extension builder
@@ -7,20 +8,15 @@ ARG PROXY=''
 
 ENV PG_VERSION="$POSTGRES_VERSION"
 
-RUN apt-get -o Acquire::http::proxy="$PROXY" update && \
+RUN --mount=type=cache,id=ubuntu,target=/var/cache/apt --mount=type=cache,id=ubuntu,target=/var/lib/apt \
+    apt-get -o Acquire::http::proxy="$PROXY" update && \
     apt-get -o Acquire::http::proxy="$PROXY" -qy dist-upgrade && \
     apt-get -o Acquire::http::proxy="$PROXY" install -qy \
       build-essential \
       git \
       libicu-dev \
       openssh-client \
-      "postgresql-server-dev-${PG_VERSION}" \
-      && \
-    apt-get -y autoremove && \
-    apt-get -y clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /var/tmp/* && \
-    rm -rf /tmp/*
+      "postgresql-server-dev-${PG_VERSION}"
 
 RUN mkdir -p /root/.ssh/ && \
     chmod -R 600 /root/.ssh/ && \
@@ -48,18 +44,14 @@ ENV DEBIAN_FRONTEND="noninteractive" \
 COPY --from=extension_builder /usr/lib/postgresql/${POSTGRES_VERSION}/lib /usr/lib/postgresql/${POSTGRES_VERSION}/lib
 COPY --from=extension_builder /usr/share/postgresql/${POSTGRES_VERSION}/extension /usr/share/postgresql/${POSTGRES_VERSION}/extension
 
-RUN apt-get -o Acquire::http::proxy="$PROXY" update && \
+RUN --mount=type=cache,id=ubuntu,target=/var/cache/apt --mount=type=cache,id=ubuntu,target=/var/lib/apt \
+    apt-get -o Acquire::http::proxy="$PROXY" update && \
     apt-get -o Acquire::http::proxy="$PROXY" -qy dist-upgrade && \
     apt install -o Acquire::http::proxy="$PROXY" -qy \
       tzdata \
        && \
     rm /etc/localtime && \
-    ln -s "/usr/share/zoneinfo/${TZ}" /etc/localtime && \
-    apt -y autoremove && \
-    apt -y clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /var/tmp/* && \
-    rm -rf /tmp/*
+    ln -s "/usr/share/zoneinfo/${TZ}" /etc/localtime
 
 RUN mkdir -p /data
 
