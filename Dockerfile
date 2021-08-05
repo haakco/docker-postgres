@@ -8,7 +8,7 @@ ARG PROXY=''
 
 ENV PG_VERSION="$POSTGRES_VERSION"
 
-RUN --mount=type=cache,id=ubuntu,target=/var/cache/apt --mount=type=cache,id=ubuntu,target=/var/lib/apt \
+RUN --mount=type=cache,sharing=locked,id=ubuntu,target=/var/cache/apt --mount=type=cache,sharing=locked,id=ubuntu,target=/var/lib/apt \
     apt-get -o Acquire::http::proxy="$PROXY" update && \
     apt-get -o Acquire::http::proxy="$PROXY" -qy dist-upgrade && \
     apt-get -o Acquire::http::proxy="$PROXY" install -qy \
@@ -44,7 +44,7 @@ ENV DEBIAN_FRONTEND="noninteractive" \
 COPY --from=extension_builder /usr/lib/postgresql/${POSTGRES_VERSION}/lib /usr/lib/postgresql/${POSTGRES_VERSION}/lib
 COPY --from=extension_builder /usr/share/postgresql/${POSTGRES_VERSION}/extension /usr/share/postgresql/${POSTGRES_VERSION}/extension
 
-RUN --mount=type=cache,id=ubuntu,target=/var/cache/apt --mount=type=cache,id=ubuntu,target=/var/lib/apt \
+RUN --mount=type=cache,sharing=locked,id=ubuntu,target=/var/cache/apt --mount=type=cache,sharing=locked,id=ubuntu,target=/var/lib/apt \
     apt-get -o Acquire::http::proxy="$PROXY" update && \
     apt-get -o Acquire::http::proxy="$PROXY" -qy dist-upgrade && \
     apt install -o Acquire::http::proxy="$PROXY" -qy \
