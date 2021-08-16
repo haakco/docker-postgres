@@ -47,11 +47,12 @@ COPY --from=extension_builder /usr/share/postgresql/${POSTGRES_VERSION}/extensio
 RUN --mount=type=cache,sharing=locked,id=ubuntu,target=/var/cache/apt --mount=type=cache,sharing=locked,id=ubuntu,target=/var/lib/apt \
     apt-get -o Acquire::http::proxy="$PROXY" update && \
     apt-get -o Acquire::http::proxy="$PROXY" -qy dist-upgrade && \
-    apt install -o Acquire::http::proxy="$PROXY" -qy \
+    apt-get install -o Acquire::http::proxy="$PROXY" -qy \
       tzdata \
        && \
     rm /etc/localtime && \
-    ln -s "/usr/share/zoneinfo/${TZ}" /etc/localtime
+    ln -s "/usr/share/zoneinfo/${TZ}" /etc/localtime && \
+    apt-get -y auto-remove
 
 RUN mkdir -p /data
 
